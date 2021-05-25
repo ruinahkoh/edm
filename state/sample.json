@@ -1,0 +1,23 @@
+{
+    "Comment": "Step function to execute multiple crawlers in parallel ",
+    "StartAt": "Execute Crawlers",
+    "States": {
+      "Execute Crawlers": {
+        "Type": "Map",
+        "InputPath": "$.crawlers",
+        "MaxConcurrency": 0,
+        "Iterator": {
+          "StartAt": "Execute",
+          "States": {
+            "Execute": {
+              "Type": "Task",
+              "Resource": "${EDMFunctionArn}",
+              "End": true
+            }
+          }
+        },
+        "End": true
+      }
+    }
+  }
+  

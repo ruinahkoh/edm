@@ -1,0 +1,13 @@
+version: 0.2
+phases:
+ install:
+  runtime-versions:
+   python: 3.8
+ build:
+  commands:
+  #  - sed -i "s|{{ BRANCH_NAME }}|$BRANCH_NAME|g" template.yml
+   - sam build
+   - sam package --s3-bucket dart-codepipeline --output-template-file outputtemplate.yml
+artifacts:
+ files:
+  - outputtemplate.yml

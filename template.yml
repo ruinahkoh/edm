@@ -1,0 +1,53 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Python file including external library
+Resources:
+  EDMFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.crawl
+      Runtime: python3.8
+      FunctionName: crawler_edm
+      CodeUri: lambdas/src
+      MemorySize: 256
+      Timeout: 800
+      Role: arn:aws:iam::608983964447:role/DataEngineering-Lambda
+      Layers: ['arn:aws:lambda:ap-southeast-1:608983964447:layer:crawler:2']
+  ESDynamo:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.8
+      FunctionName: es_dynamo
+      CodeUri: lambdas/lambda_function
+      MemorySize: 256
+      Timeout: 800
+      Role: arn:aws:iam::608983964447:role/DataEngineering-Lambda
+      Layers: ['arn:aws:lambda:ap-southeast-1:608983964447:layer:Requests:2']
+  EDMPipelineState:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: state/sample.json
+      DefinitionSubstitutions:
+        EDMFunctionArn: !GetAtt EDMFunction.Arn
+      Name: EDMPipelineState
+      Role: arn:aws:iam::608983964447:role/DataEngineering-StepFunction
+      # Events:
+      #   CWSchedule:
+      #     Type: Schedule
+      #     Properties:
+      #       Schedule: cron(0 9 * * ? *)
+      #       Name: EDMPipelineStateSchedule
+      #       Description: Schedule EDM Step Function 
+      #       Enabled: True
+
+
+  # LambdaLayer:
+  #   Type: AWS::Serverless::LayerVersion
+  #   Properties:
+  #     LayerName: lambda_layer
+  #     Description: Dependencies for the edm crawler app.
+  #     ContentUri: 's3://edmscraperbucket/lambda_layer2.zip'
+  #     CompatibleRuntimes:
+  #       - python3.8
