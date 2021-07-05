@@ -1,5 +1,7 @@
 ## edm project
+
 Building an article recommender system on AWS. The project aims to scrape articles from tech websites find the most popular articles according to keyword and then send the articles in the form of a newsletter to users,
+
 
 ### Part 1: Scraping articles from relevant websites 
 
@@ -20,6 +22,7 @@ Lambda functions
 4) Elasticsearch lambda
 5) Newsletter lambda to generate the news letter
 
+
 ### Part 4: Storage
 AWS S3 was initially used as a storage. However, to facilitate better query of the data in the future, we switched to dynamodb which can work together with elastic search
 
@@ -27,6 +30,7 @@ AWS S3 was initially used as a storage. However, to facilitate better query of t
 To ensure that changes made to the code in Codecommit will update the lambda functions and Step functions, codepipeline was used. Using Serverless Application Model, this allows us to deploy resources using a template, for example each time there is a new push to the respositor, new lambda functions and step functions will be deployed using the CICD pipeline.
 
 ### Part 6: ElasticSearch
-Each time the dyanamodb is refreshed the elasticsearch will update its index. Elasticsearch is used to query the data and output articles with the highest score for the trending keyword
+Each time the dyanamodb is refreshed the elasticsearch will update its index. Elasticsearch is used to query the data and output articles with the highest score for the trending keyword outputing a data.json
 
-
+### Part 7:
+Newsletter lambda will be triggerred to generate the newsletter from data.json produced by the elasticsearch
