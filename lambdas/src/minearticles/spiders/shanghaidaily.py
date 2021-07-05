@@ -4,7 +4,7 @@ from w3lib.url import add_or_replace_parameters
 import json
 import requests
 from scrapy.http import Request
-import datetime
+from datetime import datetime
 import re
 from scrapy.http import TextResponse
 
@@ -15,7 +15,7 @@ class ShanghaiSpider(scrapy.Spider):
     download_delay = 5.0
     handle_httpstatus_list = [200]
     allowed_domains = ['www.shine.cn']
-    start_urls = ['https://www.shine.cn/news/nation/','https://www.shine.cn/biz/tech/']
+    start_urls = ['https://www.shine.cn/biz/tech/']
 
     def parse(self, response):
         content = response.xpath('//div[@class="list-story"]')
@@ -41,12 +41,12 @@ class ShanghaiSpider(scrapy.Spider):
             blurp = response.xpath('//div[@class="content"]//p//text()').get()
         date = ''.join(response.xpath('//span[@class="glyphicon glyphicon-time"]/../text()').extract()).strip()
         date = re.search('[0-9]{4}-[0-9]{2}-[0-9]{2}',date)[0]
-        if date!='':
-            date= datetime.datetime.strptime(date, "%Y-%m-%d")
-        else:
-            date = datetime.datetime.today() 
+        try:
+            date= datetime.strptime(date, "%Y-%m-%d")
+        except:
+            date = datetime.today() 
             date = date.replace(day=1) 
-        date=datetime.datetime.strftime(date, "%d/%m/%Y")
+        date=datetime.strftime(date, "%d/%m/%Y")
         category = response.meta['category'] 
 
 
@@ -58,7 +58,8 @@ class ShanghaiSpider(scrapy.Spider):
              'url': url,
              'text': text,
              'category': category,
-             'source': self.name
+             'source': self.name,
+             'tags':None
          }
 
     

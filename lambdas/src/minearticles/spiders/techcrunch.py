@@ -45,6 +45,9 @@ class TechCrunchSpider(scrapy.Spider):
         imgurl = response.xpath('//div[contains(@class,"article__featured-image")]//img//@src').get()
         
         tags =  response.selector.xpath("//meta[@name='sailthru.tags']").extract()[0][36:-2]
+        if type(tags) == list:
+            tags = ', '.join(tags)
+        category = tags.split(', ')[0]
         yield {
             'title': title,
             'imgurl': imgurl,
@@ -52,10 +55,9 @@ class TechCrunchSpider(scrapy.Spider):
             'blurp' : blurp,
             'url': url,
             'text': text,
-            'tags': tags,
+            'tags': tags.lower(),
             'source': self.name,
-            'category':None,
-            'tags':None
+            'category':category,
         }
 
     

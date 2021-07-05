@@ -40,9 +40,9 @@ class KhaleejSpider(scrapy.Spider):
         imgurl = content.xpath('.//div[@class="main_article_img_main"]//img//@src').get()
         date = response.xpath('//div[@class="author_detail"]').get()
         date = re.search('[A-Za-z]+ [0-9]+?, [0-9]{4}',date)[0]
-        if date!='':
+        try:
             date= datetime.datetime.strptime(date, "%B %d, %Y")
-        else:
+        except:
             date = datetime.datetime.today() 
             date = date.replace(day=1) 
         date  =datetime.datetime.strftime(date, "%d/%m/%Y")
@@ -55,7 +55,8 @@ class KhaleejSpider(scrapy.Spider):
              'url': url,
              'text': text,
              'category': 'technology',
-             'source': self.name
+             'source': self.name,
+             'tags':None
          }
 
     

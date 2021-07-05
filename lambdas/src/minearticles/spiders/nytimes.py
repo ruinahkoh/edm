@@ -60,7 +60,7 @@ class NytimesSpider(scrapy.Spider):
         try:
             article_date = datetime.strftime(article_date, "%d/%m/%Y")
         except IndexError:
-            article_date = date.today()
+            article_date = date.today().replace(day=1) 
             article_date = datetime.strftime(article_date, "%d/%m/%Y")
         
 
@@ -74,5 +74,6 @@ class NytimesSpider(scrapy.Spider):
              'url': url,
              'text': text,
              'category': category,
-             'source': self.name
+             'source': self.name,
+             'tags':None
          }

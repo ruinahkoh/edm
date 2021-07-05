@@ -53,9 +53,10 @@ class TechwireAnalyticsSpider(scrapy.Spider):
                 text = text + current
 
         blurp = "".join(text.split('.')[:4])
-        tags = response.xpath("//div[@class='tags-panel']//span//text()").extract()
+        tags = response.xpath("//a[@rel='tag']//span//text()").extract()
+        category =tags[0].lower()
         tags= ', '.join([tag.lower() for tag in tags])
-        category =tags[0]
+
         yield {
              'title': title,
              'imgurl': imgurl,

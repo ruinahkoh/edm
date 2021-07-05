@@ -14,34 +14,39 @@ class GovtechSpider(scrapy.Spider):
     name = "govtech"
     download_delay = 5.0
     handle_httpstatus_list = [200]
-    start_urls =['https://www.govtech.com/security/','https://www.govtech.com/biz/','https://www.govtech.com/products/','https://www.govtech.com/gov-experience/']
+    start_urls =['https://www.govtech.com/security','https://www.govtech.com/biz','https://www.govtech.com/products','https://www.govtech.com/gov-experience']
     def parse(self, response):
+
         category = response.request.url
-        category = re.search('([^/]*)/$',category).group(1)
-        content = response.xpath('//div[@class="feature-article"]')
-        article_url = content.xpath('.//a//@href').get()
-        title=content.xpath('.//h1//a//text()').get()
-        yield(scrapy.Request(url=article_url, callback=self.parse_article, meta={'article_title': title, 'url': article_url,'category': category}))
+        category = re.search('([^/]*)$',category).group(1)
+        content = response.xpath('//div[@class="ListA-items"]')
+        for article in content:
+            for art in article.xpath('//div[@class="ListA-items-item"]'):
+                print(art)
+                if art.xpath('//div[@class="PromoC"]'):
+                    article_url = art.xpath('.//div[@class="Promo-title"]//a/@href').get()
+                    title=art.xpath('.//div[@class="Promo-title"]//a//text()').get()
+                    yield(scrapy.Request(url=article_url, callback=self.parse_article, meta={'article_title': title, 'url': article_url,'category': category}))
+                elif art.xpath('//div[@class="PromoB"]'):
+                    article_url = art.xpath('.//div[@class="Promo-title"]//a/@href').get()
+                    title=art.xpath('.//div[@class="Promo-title"]//a//text()').get()
+                    yield(scrapy.Request(url=article_url, callback=self.parse_article, meta={'article_title': title, 'url': article_url,'category': category}))
 
-        content = response.xpath('//div[@class="sub-feature-article"]')
-        for article_link in content.xpath('.//h2//a'):
-            article_url=article_link.xpath('.//@href').get()
-            article_url = article_url.split('?')[0]
-            title=article_link.xpath('.//text()').get()
-            print(article_url)
-            yield(scrapy.Request(url=article_url, callback=self.parse_article, meta={'article_title': title, 'url': article_url, 'category': category}))
-
+        
     def parse_article(self, response):
         title = response.meta['article_title'] 
         url = response.meta['url'] 
-        blurp = response.xpath('//p[@class="description"]//text()').get()
-        text=  ''.join(response.xpath('//div[@id="article_body"]//p//text()').extract())
-        imgurl = 'https:' + response.xpath('//div[@id="feature_image"]//amp-img//@src').get()
+        blurp = response.xpath('//h2[@class="Page-subHeadline"]//text()').get()
+        text=  response.xpath('//div[@class="Page-articleBody RichTextBody"]//text()').extract()
+        text = ''.join([sent.strip() for sent in text])
+        imgurl =  response.xpath('//img[@class="Image"]//@srcset').get()
         category =    response.meta['category'] 
-        date= response.xpath('//div//span[@class="date"]//text()').get().strip()   
-        if date!='':
+        tags = ', '.join(response.xpath('//div[@class="Page-tags"]//a//text()').extract())
+        date= response.xpath('//div[@class="Page-datePublished"]//text()').get().strip()
+        date =re.sub("[^0-9a-zA-Z, ]","", date).strip()
+        try:
             date= datetime.datetime.strptime(date, "%B %d, %Y")
-        else:
+        except:
             date = datetime.datetime.today() 
             date = date.replace(day=1) 
         date  =datetime.datetime.strftime(date, "%d/%m/%Y")
@@ -54,7 +59,8 @@ class GovtechSpider(scrapy.Spider):
              'url': url,
              'text': text,
              'category': category,
-             'source': self.name
+             'source': self.name,
+             'tags':tags.lower()
          }
 
     

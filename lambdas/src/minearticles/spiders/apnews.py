@@ -52,5 +52,6 @@ class ApnewsSpider(scrapy.Spider):
              'url': url,
              'text': text,
              'category': category,
-             'source': self.name
+             'source': self.name,
+             'tags':None
          }

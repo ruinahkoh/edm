@@ -55,10 +55,10 @@ class GovinsiderSpider(scrapy.Spider):
                     text = text + para_text
                         
             article_date = response.xpath("//time[@class='updated']/text()").get()
-            if article_date is not None:
+            try:
                 article_date = datetime.strptime(article_date, '%d %b %Y')
                 article_date = datetime.strftime(article_date, "%d/%m/%Y")
-            else:
+            except:
                 article_date = date.today()
                 article_date =datetime.strftime(article_date, "%d/%m/%Y")
             if blurp is None and len(text) > 50:
@@ -72,5 +72,6 @@ class GovinsiderSpider(scrapy.Spider):
                 'url': url,
                 'text': text,
                 'category':category,
-                'source': self.name
+                'source': self.name,
+                'tags':None
             }

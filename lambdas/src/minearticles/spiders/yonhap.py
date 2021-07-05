@@ -4,7 +4,7 @@ from w3lib.url import add_or_replace_parameters
 import json
 import requests
 from scrapy.http import Request
-import datetime
+from datetime import datetime
 import re
 from scrapy.http import TextResponse
 
@@ -36,11 +36,11 @@ class YonhapSpider(scrapy.Spider):
         date = content.xpath('.//span[@class="txt"]').get()
         date = re.search('[A-Za-z]+ [0-9]+?, [0-9]{4}',date)[0] 
         if date!='':
-            date= datetime.datetime.strptime(date, "%B %d, %Y")
+            date= datetime.strptime(date, "%B %d, %Y")
         else:
-            date = datetime.datetime.today() 
+            date = datetime.today() 
             date = date.replace(day=1) 
-        date  =datetime.datetime.strftime(date, "%d/%m/%Y")
+        date  =datetime.strftime(date, "%d/%m/%Y")
         
         yield {
              'title': title,
