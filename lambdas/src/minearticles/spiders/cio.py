@@ -33,14 +33,14 @@ class CioSpider(scrapy.Spider):
                     yield response.follow(url=link, callback=self.parse_article, meta={'article_title': title, 'url': article_url, 'blurp': blurp,'category':category})
 
             # get next page at the moment, doing 1 hop by specify start=40
-            next_page = response.xpath("//a[@id='load-more-index']/@href").get()
+            # next_page = response.xpath("//a[@id='load-more-index']/@href").get()
             
-            if next_page and next_page != '?start=40':
-                if category == 'analytics':
-                    full_url = f"https://www.cio.com/asean/category/analytics/{next_page}"
-                else:
-                    full_url = f"https://www.cio.com/asean/category/cloud-computing/{next_page}"
-                yield scrapy.Request(url=full_url, callback = self.parse)
+            # if next_page and next_page != '?start=40':
+            #     if category == 'analytics':
+            #         full_url = f"https://www.cio.com/asean/category/analytics/{next_page}"
+            #     else:
+            #         full_url = f"https://www.cio.com/asean/category/cloud-computing/{next_page}"
+            #     yield scrapy.Request(url=full_url, callback = self.parse)
 
         #scrape from main asean page
         else:
@@ -66,21 +66,25 @@ class CioSpider(scrapy.Spider):
         #img = response.xpath("//div[@class='col-sm-9 post-content-col']/img/@src").get()
         imgurl = response.xpath(".//img/@data-original").get()
         tags = response.selector.xpath("//meta[@itemprop='keywords']//@content").get()
+        if type(tags) == list:
+            tags = ', '.join(tags)
+        
 
         text =''
-        for para in paragraphs:
-            text = text + para.xpath(".//text()").get()
-        if text is None:
+        try:
+            for para in paragraphs:
+                text = text + para.xpath(".//text()").get()
+        except:
             pass
         
         if blurp is None:
             blurp =response.xpath('//h3[@itemprop="description"]//text()').get()
                  
         date= response.xpath('//span[@class="pub-date"]//@content').get()
-        if date != '' and date != None:
+        try:
             date =date.split('T')[0]
             date= datetime.strptime(date, "%Y-%m-%d")
-        else:
+        except:
             date = datetime.today() 
             date = date.replace(day=1) 
         date  =datetime.strftime(date, "%d/%m/%Y")

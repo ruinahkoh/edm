@@ -42,11 +42,18 @@ class OpengovAugmentedintelligenceSpider(scrapy.Spider):
         paragraphs = response.xpath("//div[contains(@class, 'theme-post-content')]/div/p")
         imgurl = response.xpath("//div[contains(@class, 'theme-post-content')]/preceding-sibling::div[contains(@class,'image')]/div//img/@src").get()
         article_date = response.xpath("//span[contains(@class,'item--type-date')]/text()").get()
-               
-        regex = re.compile(r'[\n\t,]')
-        article_date = regex.sub("", article_date)
-        article_date = article_date.lstrip()
-        article_date = datetime.strftime(datetime.strptime(article_date, '%B %d %Y'), "%d/%m/%Y")
+
+        try:       
+            regex = re.compile(r'[\n\t,]')
+            article_date = regex.sub("", article_date)
+            article_date = article_date.lstrip()
+            article_date = datetime.strptime(article_date, '%B %d %Y')
+        except:
+            article_date = datetime.today() 
+            article_date = article_date.replace(day=1) 
+
+        article_date =datetime.strftime(article_date, "%d/%m/%Y")
+
        
 
         text =''
@@ -65,5 +72,6 @@ class OpengovAugmentedintelligenceSpider(scrapy.Spider):
              'url': url,
              'text': text,
              'category': category,
-             'source': self.name
+             'source': self.name,
+             'tags':None
          }

@@ -13,34 +13,6 @@ class InfoworldSpider(scrapy.Spider):
     handle_httpstatus_list = [200]
     start_urls =['https://www.infoworld.com/category/analytics/','https://www.infoworld.com/category/machine-learning/','https://www.infoworld.com/category/software-development/','https://www.infoworld.com/category/cloud-computing/']
     def parse(self,response):
-        # catdict = {'machine-learning': {'4049' :"4995,4825"}, 
-        #     'software-development': {'3646':"3646,4403,3443,3808,3469,3761,4434,3470,3881,4047,3471"},
-        #     'cloud-computing':{'3255':"4309,3374,3375,3378,3712,4774"}, 
-        #     'analytics':{'3551':"3256,3474,3781,3408,4048"}}
-        # API_URL = 'https://www.infoworld.com/napi/tile?'
-        # for topic in catdict: 
-        #     for catid in catdict[topic]:     
-        # #     Get parameters
-        #         params = {
-        #             'def': 'loadMoreList',
-        #             'pageType' : 'index',
-        #             'catId' : catid,
-        #             'includeMediaResources': False,
-        #             'createdTypeIds': 1,
-        #             'categories': catdict[topic][catid],
-        #             'days':-7,
-        #             'pageSize':10,
-        #             'Offset' : 0,
-        #             'ignoreExcludedIds': True,
-        #             'brandContentOnly': False,
-        #             'includeBlogTypeIds': "1,3",
-        #             'includeVideo' : False,
-        #             'sortOrder': "date",
-        #             'locale_id': 0,
-        #             'startIndex': 0
-        #             }
-        # response = requests.get(API_URL,params=params)
-        # response =TextResponse(body = response.text, url = API_URL, encoding='utf-8')
         category = response.request.url
         topic = re.search('([^/]*)/$',category).group(1)
         content=response.xpath('//div[@class="river-well article"]')
@@ -58,10 +30,10 @@ class InfoworldSpider(scrapy.Spider):
         title = request.xpath('//h1[@itemprop="headline"]//text()').get()
         #get date
         date = request.xpath('//span[@class="pub-date"]/@content').get()
-        if date!='':
+        try:
             date =date.split('T')[0]
             date= datetime.datetime.strptime(date, "%Y-%m-%d")
-        else:
+        except:
             date = datetime.datetime.today() 
             date = date.replace(day=1) 
         date  =datetime.datetime.strftime(date, "%d/%m/%Y")
@@ -71,7 +43,7 @@ class InfoworldSpider(scrapy.Spider):
         blurp = request.xpath('//h3[@itemprop="description"]//text()').get()
         text = ''.join(request.xpath('//div[@itemprop="articleBody"]/descendant::text()').extract()).strip()
         text = re.sub('\[.*\]', '',text)
-        tags = request.xpath('//span[@class="primary-cat-name2"]//text()').extract()
+        tags = ', '.join(request.xpath('//span[@class="primary-cat-name2"]//text()').extract()).lower()
         
         url= request.meta['url']
         category = request.meta['category']

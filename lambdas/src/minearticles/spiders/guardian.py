@@ -7,7 +7,7 @@ from newspaper import Article
 
 class GuardianSpider(scrapy.Spider):
     name = 'guardian'
-    allowed_domains = ['www.theguardian.com']
+    allowed_domains = ['www.theguardian.com/technology','https://www.theguardian.com/uk/technology']
     start_urls = ['https://www.theguardian.com/technology/all', 'https://www.theguardian.com/uk/technology'] #internationala and uk specific site
 
     def parse(self, response):
@@ -29,10 +29,20 @@ class GuardianSpider(scrapy.Spider):
     def parse_article(self,response):
        
         url = response.request.meta['url']
-        blurp =response.xpath('//div[@class="css-zjgnrw"]//p//text()').get()
-        tags =response.xpath('//li[@class="css-184iqxr"]//a//text()').extract()
-        category = response.xpath('//li[@class="css-blajdl"]//a//text()').get()
+
+        #many versions of blurp
+        blurp =response.xpath('//div[@class="dcr-mj1r7n"]//text()').get()
+        if blurp is None:
+            blurp =response.xpath('//div[@class="dcr-1wzmzme"]//p//text()').get()
+            if blurp is None:
+                blurp =response.xpath('//div[@class="dcr-zcv58i"]//p//text()').get()
+            
+
+
+        tags =response.xpath('//ul[@class="dcr-1r2wmvc"]//a//text()').extract()
+        category = response.xpath('//li[@class="dcr-18or3t6"]//a//text()').get()
         tags.append(category)
+        tags =', '.join(tags).lower()
         def get_key_word(url):
             article = Article(url)
             article.download()
@@ -66,6 +76,6 @@ class GuardianSpider(scrapy.Spider):
                 'url': url,
                 'text': text,
                 'category': category,
-                'tags':tags,
+                'tags':tags.lower(),
                 'source': self.name
             }
